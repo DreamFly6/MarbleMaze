@@ -6,20 +6,32 @@
 //
 
 import SpriteKit
+import CoreMotion
 
 class GameScene: SKScene {
     
     var player: SKSpriteNode!
+    var motionManager: CMMotionManager!
     
     override func didMove(to view: SKView) {
         
+        // Set background image
         let background = SKSpriteNode(imageNamed: "background.jpg")
         background.position = CGPoint(x: 512, y: 384)
         background.blendMode = .replace
         background.zPosition = -1
         addChild(background)
         
+        // Turn off gravity
+        physicsWorld.gravity = .zero
+        
+        // Setup maze and player position
         loadLevel()
+        createPlayer()
+        
+        // activate Core Motion
+        motionManager = CMMotionManager()
+        motionManager.startAccelerometerUpdates()
     }
     
     func createPlayer() {
@@ -99,6 +111,21 @@ class GameScene: SKScene {
                 }
             }
         }
+    }
+    
+    override func update(_ currentTime: TimeInterval) {
+        // this is to test on simulator
+        // Not ready yet, maybe later
+#if targetEnvironment(simulator)
+//        if let currentTouch = lastTouchPosition {
+//            let diff = CGPoint(x: currentTouch.x - player.position.x, y: currentTouch.y - player.position.y)
+//            physicsWorld.gravity = CGVector(dx: diff.x / 100, dy: diff.y / 100)
+//        }
+#else
+        if let accelerometerData = motionManager.accelerometerData {
+            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -50, dy: accelerometerData.acceleration.x * 50)
+        }
+#endif
     }
     
 }
