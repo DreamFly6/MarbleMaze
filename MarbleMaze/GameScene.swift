@@ -8,10 +8,18 @@
 import SpriteKit
 import CoreMotion
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var player: SKSpriteNode!
     var motionManager: CMMotionManager!
+    var scoreLabel: SKLabelNode!
+    var isGameOver = false
+
+    var score = 0 {
+        didSet {
+            scoreLabel.text = "Score: \(score)"
+        }
+    }
     
     override func didMove(to view: SKView) {
         
@@ -22,8 +30,17 @@ class GameScene: SKScene {
         background.zPosition = -1
         addChild(background)
         
-        // Turn off gravity
+        // Add score
+        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+        scoreLabel.text = "Score: 0"
+        scoreLabel.horizontalAlignmentMode = .left
+        scoreLabel.position = CGPoint(x: 16, y: 16)
+        scoreLabel.zPosition = 2
+        addChild(scoreLabel)
+        
+        // Setup physics
         physicsWorld.gravity = .zero
+        physicsWorld.contactDelegate = self
         
         // Setup maze and player position
         loadLevel()
@@ -114,6 +131,9 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
+        // check if game is over or not
+        guard isGameOver == false else { return }
+        
         // this is to test on simulator
         // Not ready yet, maybe later
 #if targetEnvironment(simulator)
@@ -128,4 +148,16 @@ class GameScene: SKScene {
 #endif
     }
     
+    //MARK: - SKPhysicsContactDelegate
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        guard let nodeA = contact.bodyA.node else { return }
+        guard let nodeB = contact.bodyB.node else { return }
+
+        if nodeA == player {
+            playerCollided(with: nodeB)
+        } else if nodeB == player {
+            playerCollided(with: nodeA)
+        }
+    }
 }
