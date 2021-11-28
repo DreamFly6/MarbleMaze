@@ -14,6 +14,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var motionManager: CMMotionManager!
     var scoreLabel: SKLabelNode!
     var isGameOver = false
+    var level = 1
 
     var score = 0 {
         didSet {
@@ -23,6 +24,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
         
+        // Setup physics
+        physicsWorld.gravity = .zero
+        physicsWorld.contactDelegate = self
+        
+        // Setup maze and player position
+        setupInterface()
+        loadLevel()
+        createPlayer()
+        
+        // activate Core Motion
+        motionManager = CMMotionManager()
+        motionManager.startAccelerometerUpdates()
+    }
+    
+    func setupInterface() {
         // Set background image
         let background = SKSpriteNode(imageNamed: "background.jpg")
         background.position = CGPoint(x: 512, y: 384)
@@ -37,18 +53,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.position = CGPoint(x: 16, y: 16)
         scoreLabel.zPosition = 2
         addChild(scoreLabel)
-        
-        // Setup physics
-        physicsWorld.gravity = .zero
-        physicsWorld.contactDelegate = self
-        
-        // Setup maze and player position
-        loadLevel()
-        createPlayer()
-        
-        // activate Core Motion
-        motionManager = CMMotionManager()
-        motionManager.startAccelerometerUpdates()
     }
     
     func createPlayer() {
@@ -66,8 +70,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func loadLevel() {
-        guard let levelURL = Bundle.main.url(forResource: "level1", withExtension: "txt") else {fatalError("Can't find level1.txt")}
-        guard let levelString = try? String(contentsOf: levelURL) else {fatalError("Can't load level1.txt")}
+        guard let levelURL = Bundle.main.url(forResource: "level\(level)", withExtension: "txt") else {fatalError("Can't find level\(level).txt")}
+        guard let levelString = try? String(contentsOf: levelURL) else {fatalError("Can't load level\(level).txt")}
 
         let lines = levelString.components(separatedBy: "\n")
 
@@ -157,7 +161,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             node.removeFromParent()
             score += 1
         } else if node.name == "finish" {
-            // next level?
+            node.removeFromParent()
+            score += 1
+            level += 1
+            
+            for child in self.children {
+                child.removeFromParent()
+            }
+            
+            setupInterface()
+            loadLevel()
+            createPlayer()
         }
     }
     
