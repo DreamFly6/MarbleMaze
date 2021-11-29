@@ -89,6 +89,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     createFinish(at: position)
                 } else if letter == " " {
                     // this is an empty space – do nothing!
+                } else if letter == "t" {
+                    createTeleportEntrance(at: position)
+                } else if letter == "e" {
+                    createTeleportExit(at: position)
                 } else {
                     fatalError("Unknown level letter: \(letter)")
                 }
@@ -136,6 +140,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
         node.physicsBody?.isDynamic = false
         node.physicsBody?.categoryBitMask = CollisionTypes.finish.rawValue
+        node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
+        node.physicsBody?.collisionBitMask = 0
+        node.position = position
+        addChild(node)
+    }
+    
+    func createTeleportEntrance(at position: CGPoint) {
+        let node = SKSpriteNode(color: .systemBlue, size: CGSize(width: 50, height: 50))
+        node.name = "teleportEntrance"
+        node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
+        node.physicsBody?.isDynamic = false
+        node.physicsBody?.categoryBitMask = CollisionTypes.tEntrance.rawValue
+        node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
+        node.physicsBody?.collisionBitMask = 0
+        node.position = position
+        addChild(node)
+    }
+    
+    func createTeleportExit(at position: CGPoint) {
+        let node = SKSpriteNode(color: .systemRed, size: CGSize(width: 50, height: 50))
+        node.name = "teleportExit"
+        node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
+        node.physicsBody?.isDynamic = false
+        node.physicsBody?.categoryBitMask = CollisionTypes.tExit.rawValue
         node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
         node.physicsBody?.collisionBitMask = 0
         node.position = position
