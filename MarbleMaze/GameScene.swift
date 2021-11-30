@@ -15,6 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var scoreLabel: SKLabelNode!
     var isGameOver = false
     var level = 1
+    var isTeleported = false
 
     var score = 0 {
         didSet {
@@ -31,7 +32,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Setup maze and player position
         setupInterface()
         loadLevel()
-        createPlayer()
+        createPlayer(at: CGPoint(x: 96, y: 672))
         
         // activate Core Motion
         motionManager = CMMotionManager()
@@ -55,9 +56,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(scoreLabel)
     }
     
-    func createPlayer() {
+    func createPlayer(at position: CGPoint) {
         player = SKSpriteNode(imageNamed: "player")
-        player.position = CGPoint(x: 96, y: 672)
+        player.position = position
         player.zPosition = 1
         player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width / 2)
         player.physicsBody?.allowsRotation = false
@@ -70,6 +71,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func loadLevel() {
+        isTeleported = false
         guard let levelURL = Bundle.main.url(forResource: "level\(level)", withExtension: "txt") else {fatalError("Can't find level\(level).txt")}
         guard let levelString = try? String(contentsOf: levelURL) else {fatalError("Can't load level\(level).txt")}
 
@@ -182,7 +184,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let sequence = SKAction.sequence([move, scale, remove])
 
             player.run(sequence) { [weak self] in
-                self?.createPlayer()
+                self?.createPlayer(at: CGPoint(x: 96, y: 672))
                 self?.isGameOver = false
             }
         } else if node.name == "star" {
@@ -199,7 +201,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             setupInterface()
             loadLevel()
-            createPlayer()
+            createPlayer(at: CGPoint(x: 96, y: 672))
+        } else if node.name == "teleportEntrance" && !isTeleported {
+            isTeleported = true
+            player.removeFromParent()
+            createPlayer(at: childNode(withName: "teleportExit")?.position ?? CGPoint(x: 96, y: 672))
+        } else if node.name == "teleportExit" && !isTeleported {
+            isTeleported = true
+            player.removeFromParent()
+            createPlayer(at: childNode(withName: "teleportEntrance")?.position ?? CGPoint(x: 96, y: 672))
         }
     }
     
