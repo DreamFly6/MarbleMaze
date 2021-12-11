@@ -76,7 +76,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let levelString = try? String(contentsOf: levelURL) else {fatalError("Can't load level\(level).txt")}
 print(levelString)
         var lines = levelString.components(separatedBy: "\n")
-        lines.removeLast()
+        // to remove last empty line
+        for i in 0...lines.count-1 {
+            if lines[i] == "" {
+                lines.remove(at: i)
+            }
+        }
 print(lines)
         for (row, line) in lines.reversed().enumerated() {
             for (column, letter) in line.enumerated() {
