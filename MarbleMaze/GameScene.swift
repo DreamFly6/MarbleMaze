@@ -74,9 +74,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         isTeleported = false
         guard let levelURL = Bundle.main.url(forResource: "level\(level)", withExtension: "txt") else {fatalError("Can't find level\(level).txt")}
         guard let levelString = try? String(contentsOf: levelURL) else {fatalError("Can't load level\(level).txt")}
-
-        let lines = levelString.components(separatedBy: "\n")
-
+print(levelString)
+        var lines = levelString.components(separatedBy: "\n")
+        lines.removeLast()
+print(lines)
         for (row, line) in lines.reversed().enumerated() {
             for (column, letter) in line.enumerated() {
                 let position = CGPoint(x: (64 * column) + 32, y: (64 * row) + 32)
